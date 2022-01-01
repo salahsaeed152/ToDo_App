@@ -1,6 +1,6 @@
-import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_conditional_rendering/conditional.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/shared/components/components.dart';
 import 'package:todo_app/shared/cubit/cubit.dart';
@@ -38,15 +38,19 @@ class HomeLayout extends StatelessWidget {
             floatingActionButton: FloatingActionButton(
               onPressed: () {
                 if (cubit.isBottomSheetShown) {
-                  if (formKey.currentState.validate()) {
+                  if (formKey.currentState!.validate()) {
                     cubit.insertIntoDatabase(
                       title: titleController.text,
                       time: timeController.text,
                       date: dateController.text,
-                    );
+                    ).then((value) {
+                      titleController.text = '';
+                      timeController.text = '';
+                      dateController.text = '';
+                    });
                   }
                 } else {
-                  scaffoldKey.currentState
+                  scaffoldKey.currentState!
                       .showBottomSheet(
                         (context) =>
                         Container(
@@ -66,8 +70,8 @@ class HomeLayout extends StatelessWidget {
                                 defaultTextForm(
                                   controller: titleController,
                                   type: TextInputType.text,
-                                  validate: (String value) {
-                                    if (value.isEmpty) {
+                                  validate: (String? value) {
+                                    if (value!.isEmpty) {
                                       return 'Title must not be empty';
                                     }
                                     return null;
@@ -79,8 +83,8 @@ class HomeLayout extends StatelessWidget {
                                 defaultTextForm(
                                   controller: timeController,
                                   type: TextInputType.datetime,
-                                  validate: (String value) {
-                                    if (value.isEmpty) {
+                                  validate: (String? value) {
+                                    if (value!.isEmpty) {
                                       return 'Time must not be empty';
                                     }
                                     return null;
@@ -91,7 +95,7 @@ class HomeLayout extends StatelessWidget {
                                       initialTime: TimeOfDay.now(),
                                     ).then((value) {
                                       timeController.text =
-                                          value.format(context);
+                                          value!.format(context);
                                     });
                                   },
                                   label: 'Task time',
@@ -101,8 +105,8 @@ class HomeLayout extends StatelessWidget {
                                 defaultTextForm(
                                   controller: dateController,
                                   type: TextInputType.datetime,
-                                  validate: (String value) {
-                                    if (value.isEmpty) {
+                                  validate: (String? value) {
+                                    if (value!.isEmpty) {
                                       return 'Date must not be empty';
                                     }
                                     return null;
@@ -112,10 +116,10 @@ class HomeLayout extends StatelessWidget {
                                       context: context,
                                       initialDate: DateTime.now(),
                                       firstDate: DateTime.now(),
-                                      lastDate: DateTime(2021, 12, 31),
+                                      lastDate: DateTime(DateTime.now().year +1, 12, 31),
                                     ).then((value) {
                                       dateController.text =
-                                          DateFormat.yMMMd().format(value);
+                                          DateFormat.yMMMd().format(value!);
                                     });
                                   },
                                   label: 'Task date',
@@ -134,8 +138,7 @@ class HomeLayout extends StatelessWidget {
                   cubit.changeBottomSheetState(true);
                 }
               },
-              child: Icon(
-                cubit.isBottomSheetShown ? Icons.add : Icons.edit,
+              child: Icon(cubit.isBottomSheetShown ? Icons.add : Icons.edit,
               ),
             ),
             bottomNavigationBar: BottomNavigationBar(
@@ -164,13 +167,11 @@ class HomeLayout extends StatelessWidget {
                 ),
               ],
             ),
-            body: ConditionalBuilder(
-              condition: state is! AppGetDatabaseLoadingState,
-              builder: (context) => cubit.screens[cubit.currentIndex],
-              fallback: (context) =>
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
+            body: Conditional.single(
+              context: context,
+              conditionBuilder: (context) => state is! AppGetDatabaseLoadingState,
+              widgetBuilder: (context) => cubit.screens[cubit.currentIndex],
+              fallbackBuilder: (context) => Center(child: CircularProgressIndicator()),
             ),
           );
         },

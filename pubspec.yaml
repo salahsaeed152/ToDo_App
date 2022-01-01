@@ -9,7 +9,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -18,17 +18,19 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  sqflite: ^2.0.0+3
+  cupertino_icons: ^1.0.4
   #sqflite package for local storage
-  intl: ^0.17.0
+  sqflite: ^2.0.1
   #intl package for date format
-  conditional_builder: ^1.0.2
-  #conditional_builder package for manage all conditions in my app
-  bloc: ^7.0.0
+  intl: ^0.17.0
+  #flutter_conditional_rendering package for manage all conditions in my app
+  flutter_conditional_rendering: ^2.0.0
   #bloc package for State management  in my app
-  flutter_bloc: ^7.0.0
+  bloc: ^8.0.2
   #flutter_bloc package for State management  in my app
+  flutter_bloc: ^8.0.1
+  path:
+
 
 dev_dependencies:
   flutter_test:

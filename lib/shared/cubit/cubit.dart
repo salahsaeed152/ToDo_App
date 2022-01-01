@@ -1,6 +1,6 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/modules/archived_tasks/archived_tasks.dart';
 import 'package:todo_app/modules/done_tasks/done_tasks.dart';
@@ -25,7 +25,7 @@ class AppCubit extends Cubit<AppStates> {
     ArchivedTasks(),
   ];
 
-  Database database;
+  late Database database;
   List<Map> newTasks = [];
   List<Map> doneTasks = [];
   List<Map> archiveTasks = [];
@@ -37,8 +37,10 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppChangeBottomNavBarState());
   }
 
-  void createDatabase() {
-    openDatabase('todo.db', version: 1, onCreate: (database, version) {
+  void createDatabase() async{
+    String path = join(await getDatabasesPath(), 'todo.db');
+
+    await openDatabase(path, version: 1, onCreate: (database, version) {
       print('Database created');
       database
           .execute(
@@ -57,13 +59,13 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  insertIntoDatabase({
-    @required String title,
-    @required String time,
-    @required String date,
+  Future<void> insertIntoDatabase({
+    required String title,
+    required String time,
+    required String date,
   }) async {
-    await database.transaction((txn) {
-      txn
+    database.transaction((txn) async{
+      await txn
           .rawInsert(
               'INSERT INTO tasks (title, date, time, status) VALUES ("$title", "$date", "$time", "new")')
           .then((value) {
@@ -74,7 +76,6 @@ class AppCubit extends Cubit<AppStates> {
       }).catchError((error) {
         print('Error when inserting new record ${error.toString()}');
       });
-      return null;
     });
   }
 
@@ -103,8 +104,8 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   void updateData({
-    @required String status,
-    @required int id,
+    required String status,
+    required int? id,
   }) {
     database.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
         ['$status', id]).then((value) {
@@ -114,7 +115,7 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   void deleteData({
-    @required int id,
+    required int? id,
   }) {
     database.rawUpdate('DELETE FROM tasks  WHERE id = ?', [id])
         .then((value)

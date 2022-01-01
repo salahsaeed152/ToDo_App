@@ -6,7 +6,7 @@ import 'package:todo_app/shared/cubit/cubit.dart';
 import 'package:todo_app/shared/cubit/states.dart';
 
 class NewTasks extends StatelessWidget {
-  const NewTasks({Key key}) : super(key: key);
+  const NewTasks({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class NewTasks extends StatelessWidget {
       listener: (context, state){},
       builder: (context, state){
         var tasks = AppCubit.get(context).newTasks;
-        return conditionalItemBuilder(tasks: tasks);
+        return conditionalItemBuilder(tasks: tasks, context: context);
       },
     );
   }

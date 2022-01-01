@@ -1,20 +1,19 @@
-import 'package:conditional_builder/conditional_builder.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_conditional_rendering/conditional.dart';
 import 'package:todo_app/shared/cubit/cubit.dart';
 
 Widget defaultTextForm({
-  @required TextEditingController controller,
-  @required TextInputType type,
-  Function onSubmit,
-  Function onChange,
-  Function onTap,
+  required TextEditingController controller,
+  required TextInputType type,
+  Function(String)? onSubmit,
+  Function(String)? onChange,
+  Function()? onTap,
   bool isPassword = false,
-  @required Function validate,
-  @required String label,
-  @required IconData prefix,
-  IconData suffix,
-  Function suffixPressed,
+  required String? Function(String?)? validate,
+  required String? label,
+  required IconData prefix,
+  IconData? suffix,
+  Function? suffixPressed,
   bool isClickable = true,
 }) =>
     Container(
@@ -118,10 +117,12 @@ Widget buildTaskItem(Map taskModel, BuildContext context) => Dismissible(
     );
 
 Widget conditionalItemBuilder ({
-  @required List<Map> tasks,
-}) => ConditionalBuilder(
-  condition: tasks.length > 0,
-  builder: (context) => ListView.separated(
+  required List<Map> tasks,
+  required BuildContext context,
+}) => Conditional.single(
+  context: context,
+  conditionBuilder: (context) => tasks.length > 0,
+  widgetBuilder: (context) => ListView.separated(
     itemBuilder: (context, index) => buildTaskItem(tasks[index], context),
     separatorBuilder: (context, index) => Padding(
       padding: const EdgeInsetsDirectional.only(
@@ -135,7 +136,7 @@ Widget conditionalItemBuilder ({
     ),
     itemCount: tasks.length,
   ),
-  fallback: (context) => Center(
+  fallbackBuilder: (context) => Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
